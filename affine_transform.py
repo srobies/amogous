@@ -17,9 +17,10 @@ class Affine_Transform():
         self.get_amongus_features()
         self.get_all_faces_features()
 
+        self.frames_dir = 'output/frames'
+
     #=========================== LANDMARK FEATURES SECTION ===========================#
     def get_amongus_features(self):
-        
         with open('data/amongus_points.txt') as f:
             feature_points = f.readlines()
 
@@ -205,3 +206,38 @@ class Affine_Transform():
 
         plt.suptitle('Face Morph', size=30)
         plt.show()
+
+    def generate_frames(self, alpha_list):
+        frames = [0] * len(alpha_list)
+        start_img = self.amongus_image.start_img
+        end_img = self.amongus_image.amongus_final
+        bbxs = self.amongus_image.bbxs
+
+        for i, alpha in enumerate(alpha_list):
+            # saves time on alpha 0 and 1
+            if alpha != 0 and alpha != 1:
+                final_assign = start_img.copy()
+
+                # for each bbx, affine transform and blend at given alpha
+                for j, bbx in enumerate(bbxs):
+                    start_feature_points = self.face_features_list[j]
+                    end_feature_points = self.amongus_features_list[j]
+                    a, b, width, height = bbx
+
+                    # get the blended points
+                    blended_points = self.weighted_avg_pts(start_feature_points, end_feature_points, percentage=alpha)
+                    # get the warped results from both end
+                    start_face = self.warp_image(start_img[b:b+height, a:a+width], start_feature_points, blended_points)
+                    end_face   = self.warp_image(end_img[b:b+height, a:a+width], end_feature_points, blended_points)
+                    # alpha blend the results
+                    blended_image  = self.weighted_avg_img(start_face, end_face, percentage=alpha)
+
+                    final_assign[b:b+height, a:a+width] = np.where(blended_image != 0, blended_image, start_img[b:b+height, a:a+width])
+            else:
+                final_assign = (end_img, start_img)[int(alpha)]
+            frames[i] = final_assign
+
+        if alpha_list[-1] != 0:
+            frames.append(end_img)
+
+        return frames
