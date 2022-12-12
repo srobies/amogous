@@ -1,4 +1,3 @@
-from os.path import sep
 import os
 import cv2 as cv2
 from amongus import Amongus_Image
@@ -7,7 +6,8 @@ from video_result import Amongus_Video
 import time
 # Referencing this code for face capture: https://github.com/shantnu/Webcam-Face-Detect/blob/master/webcam.py
 
-# load the overlay image. size should be smaller than video frame size
+if not os.path.isdir('output'):
+    os.makedirs('output')
 video_name = f'output/final_output.mp4'
 img = cv2.VideoCapture(video_name)
 
