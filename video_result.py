@@ -3,6 +3,7 @@ import moviepy.editor as mpe
 import cv2
 import matplotlib.pyplot as plt
 
+# referencing this code https://stackoverflow.com/questions/43048725/python-creating-video-from-images-using-opencv
 class Amongus_Video():
     def __init__(self, affine_transform:Affine_Transform, 
                        alpha_smooth:(lambda x: (12**x-1)/11)) -> None:
